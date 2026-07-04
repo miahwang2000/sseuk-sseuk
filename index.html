@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>쓱쓱그려요</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🖍️</text></svg>"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap');
+
+:root{
+  --bg-page:#16241f;
+  --board:#2f4f43;
+  --board-light:#3a5f51;
+  --board-dark:#243f35;
+  --wood:#8b5a3c;
+  --wood-dark:#6e4630;
+  --wood-light:#a3724f;
+  --chalk:#f5f1e6;
+  --chalk-dim:#c9d0c5;
+  --yellow:#ffc93c;
+  --coral:#ff6f59;
+  --sky:#5dade2;
+  --purple:#9b6bce;
+  --correct:#6fcf97;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,0.03), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(255,255,255,0.03), transparent 40%),
+    var(--bg-page);
+  font-family:'Gaegu', sans-serif;
+  color:var(--chalk);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+}
+
+.app{
+  width:100%;
+  max-width:560px;
+}
+
+/* ---------- frame ---------- */
+.frame{
+  background:linear-gradient(180deg, var(--wood-light), var(--wood) 18%, var(--wood-dark));
+  border-radius:22px;
+  padding:14px;
+  box-shadow:0 18px 40px rgba(0,0,0,0.45), inset 0 0 0 2px rgba(0,0,0,0.15);
+}
+
+.board{
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.04), transparent 35%),
+    radial-gradient(circle at 85% 75%, rgba(255,255,255,0.035), transparent 35%),
+    var(--board);
+  border-radius:14px;
+  padding:20px;
+  position:relative;
+  outline:2px dashed rgba(245,241,230,0.18);
+  outline-offset:-10px;
+}
+
+/* ---------- header ---------- */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.logo{
+  font-family:'Jua', sans-serif;
+  font-size:26px;
+  color:var(--chalk);
+  text-shadow:0 0 10px rgba(245,241,230,0.25);
+  letter-spacing:0.5px;
+}
+.logo span{ color:var(--yellow); }
+
+.dots{
+  display:flex;
+  gap:8px;
+}
+.dot{
+  width:16px;height:16px;
+  border-radius:50%;
+  border:2px solid var(--chalk-dim);
+  background:transparent;
+  transition:transform .25s ease;
+}
+.dot.current{
+  border-color:var(--yellow);
+  box-shadow:0 0 0 3px rgba(255,201,60,0.18);
+  transform:scale(1.15);
+}
+.dot.correct{ background:var(--correct); border-color:var(--correct); }
+.dot.wrong{ background:var(--coral); border-color:var(--coral); }
+
+/* ---------- screens ---------- */
+.screen{ display:none; }
+.screen.active{ display:block; }
+/* ---------- role select screen ---------- */
+.role-wrap{ text-align:center; padding:40px 20px; }
+.role-emoji{ font-size:64px; margin-bottom:12px; }
+.role-title{
+  font-family:'Jua', sans-serif;
+  font-size:28px;
+  margin:6px 0 6px;
+  color:var(--chalk);
+}
+.role-desc{
+  color:var(--chalk-dim);
+  font-size:16px;
+  margin-bottom:24px;
+}
+.role-buttons{
+  display:flex;
+  gap:16px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.role-buttons .btn{
+  min-width:140px;
+}
+
+/* ---------- room code screen ---------- */
+.room-wrap{ text-align:center; padding:40px 20px; }
+.room-emoji{ font-size:64px; margin-bottom:12px; }
+.room-title{
+  font-family:'Jua', sans-serif;
+  font-size:24px;
+  margin:6px 0 6px;
+  color:var(--chalk);
+}
+.room-desc{
+  color:var(--chalk-dim);
+  font-size:14px;
+  margin-bottom:24px;
+}
+.room-code-display{
+  font-family:'Jua', sans-serif;
+  font-size:48px;
+  font-weight:700;
+  color:var(--yellow);
+  margin:20px 0;
+  padding:16px;
+  border:3px dashed var(--yellow);
+  border-radius:12px;
+  background:rgba(255,201,60,0.1);
+  letter-spacing:12px;
+}
+.room-input{
+  font-family:'Jua', sans-serif;
+  font-size:36px;
+  font-weight:700;
+  width:180px;
+  padding:14px;
+  text-align:center;
+  border:3px solid var(--yellow);
+  border-radius:12px;
+  background:rgba(245,241,230,0.05);
+  color:var(--yellow);
+  margin:24px 0 12px;
+  letter-spacing:8px;
+}
+.room-input:focus{
+  outline:none;
+  border-color:var(--yellow);
+  box-shadow:0 0 0 4px rgba(255,201,60,0.25);
+  background:rgba(245,241,230,0.1);
+}
+.room-input::placeholder{ color:rgba(255,201,60,0.4); }
+.room-error{
+  color:var(--coral);
+  font-size:14px;
+  margin-bottom:16px;
+  min-height:20px;
+  display:none;
+}
+.room-error.show{ display:block; }
+.room-wrap .btn{
+  margin:8px 4px;
+}
+
+/* ---------- start screen ---------- */
+.start-wrap{ text-align:center; padding:30px 6px 10px; }
+.chalk-illustration{ font-size:64px; margin-bottom:6px; }
+.start-title{
+  font-family:'Jua', sans-serif;
+  font-size:24px;
+  margin:6px 0 10px;
+}
+.start-desc{
+  color:var(--chalk-dim);
+  font-size:16px;
+  line-height:1.6;
+  margin-bottom:22px;
+}
+.btn{
+  font-family:'Gaegu', sans-serif;
+  font-weight:700;
+  font-size:17px;
+  border:none;
+  border-radius:30px;
+  padding:13px 26px;
+  cursor:pointer;
+  color:var(--board-dark);
+  background:var(--chalk);
+  box-shadow:0 4px 0 rgba(0,0,0,0.25);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.btn:hover{ transform:translateY(-2px); }
+.btn:active{ transform:translateY(1px); box-shadow:0 1px 0 rgba(0,0,0,0.25); }
+.btn:focus-visible{ outline:3px solid var(--yellow); outline-offset:2px; }
+.btn-primary{ background:var(--yellow); }
+.btn-ghost{
+  background:transparent;
+  color:var(--chalk);
+  border:2px solid var(--chalk-dim);
+  box-shadow:none;
+}
+.btn-ghost:active{ transform:translateY(1px); }
+.btn[disabled]{ opacity:0.4; cursor:not-allowed; transform:none !important; }
+
+.round-select{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-bottom:22px;
+}
+.round-btn{
+  font-family:'Gaegu', sans-serif;
+  font-weight:700;
+  font-size:16px;
+  background:rgba(245,241,230,0.08);
+  border:2px solid var(--chalk-dim);
+  color:var(--chalk);
+  border-radius:20px;
+  padding:9px 18px;
+  cursor:pointer;
+}
+.round-btn:focus-visible{ outline:3px solid var(--yellow); outline-offset:2px; }
+.round-btn.active{ background:var(--yellow); color:var(--board-dark); border-color:var(--yellow); }
+
+/* ---------- play screen ---------- */
+.prompt-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+.word-badge{
+  font-family:'Jua', sans-serif;
+  font-size:20px;
+  background:rgba(245,241,230,0.08);
+  border:2px dashed var(--chalk-dim);
+  border-radius:16px;
+  padding:8px 16px;
+}
+.word-badge b{
+  color:var(--yellow);
+  font-size:24px;
+  margin-left:4px;
+}
+.timer{
+  position:relative;
+  width:56px;height:56px;
+  flex-shrink:0;
+}
+.timer svg{ transform:rotate(-90deg); }
+.timer-bg{ fill:none; stroke:rgba(245,241,230,0.15); stroke-width:6; }
+.timer-fg{
+  fill:none; stroke:var(--sky); stroke-width:6; stroke-linecap:round;
+  transition:stroke-dasharray .3s linear, stroke .3s ease;
+}
+.timer-num{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Jua', sans-serif; font-size:18px;
+}
+
+.canvas-wrap{
+  position:relative;
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--board-dark);
+  box-shadow:inset 0 0 0 2px rgba(245,241,230,0.12), inset 0 0 30px rgba(0,0,0,0.35);
+  touch-action:none;
+}
+#drawCanvas{
+  display:block;
+  width:100%;
+  height:auto;
+  cursor:crosshair;
+}
+.canvas-hint{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(245,241,230,0.28);
+  font-size:15px;
+  pointer-events:none;
+  text-align:center;
+  padding:0 20px;
+}
+
+.toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+.tool-group{ display:flex; gap:8px; }
+.icon-btn{
+  font-family:'Gaegu', sans-serif;
+  font-size:14px;
+  background:rgba(245,241,230,0.08);
+  border:2px solid var(--chalk-dim);
+  color:var(--chalk);
+  border-radius:20px;
+  padding:9px 14px;
+  cursor:pointer;
+}
+.icon-btn:focus-visible{ outline:3px solid var(--yellow); outline-offset:2px; }
+.icon-btn.active{ background:var(--yellow); color:var(--board-dark); border-color:var(--yellow); }
+
+/* ---------- overlay ---------- */
+.overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(22,36,31,0.92);
+  border-radius:14px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:24px;
+}
+.overlay.active{ display:flex; }
+.overlay-inner{ max-width:360px; }
+.overlay-emoji{ font-size:46px; margin-bottom:8px; }
+.overlay-title{ font-family:'Jua', sans-serif; font-size:22px; margin-bottom:8px; }
+.overlay-sub{ color:var(--chalk-dim); font-size:15px; line-height:1.6; margin-bottom:18px; }
+.overlay-sub b{ color:var(--yellow); }
+
+.spinner{
+  width:34px;height:34px;
+  border-radius:50%;
+  border:4px solid rgba(245,241,230,0.2);
+  border-top-color:var(--yellow);
+  margin:0 auto 14px;
+  animation:spin 0.9s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@keyframes pulse{ 
+  0%, 100%{ opacity:1; }
+  50%{ opacity:0.5; }
+}
+
+/* ---------- summary ---------- */
+.summary-wrap{ text-align:center; padding:18px 4px; }
+.summary-score{
+  font-family:'Jua', sans-serif;
+  font-size:42px;
+  color:var(--yellow);
+  margin:10px 0 4px;
+}
+.summary-dots{ display:flex; gap:10px; justify-content:center; margin:18px 0 26px; }
+.summary-dots .dot{ width:20px; height:20px; }
+
+.footer-note{
+  text-align:center;
+  color:var(--chalk-dim);
+  font-size:13px;
+  margin-top:14px;
+  opacity:0.7;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="frame">
+    <div class="board" id="board">
+
+      <div class="header">
+        <div class="logo">쓱쓱<span>그려요</span></div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <div class="dots" id="dots"></div>
+          <div class="home-btn-wrapper">
+            <a href="javascript:void(0)" id="btnExitGame" style="display: inline-block; padding: 8px 14px; background: rgba(245,241,230,0.08); border: 2px solid var(--chalk-dim); color: var(--chalk); border-radius: 20px; text-decoration: none; font-family: 'Gaegu', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer;">🏠 나가기</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🎯 역할 선택 화면 (처음 active) -->
+      <div class="screen active" id="screen-role">
+        <div class="role-wrap">
+          <div class="role-emoji">👥</div>
+          <div class="role-title">쓱쓱그려요</div>
+          <div class="role-desc">당신의 역할을 선택하세요</div>
+          <div class="role-buttons">
+            <button class="btn btn-primary" id="btnTeacher">👨‍🏫 선생님</button>
+            <button class="btn btn-primary" id="btnStudent">👧 학생</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🔐 ROOM CODE 화면 (teacher/student 모드) -->
+      <div class="screen" id="screen-room">
+        <!-- 🔐 TEACHER 모드: 코드 생성 및 표시 -->
+        <div id="room-teacher" style="display: none;">
+          <!-- Teacher Entry: 코드 생성/표시 -->
+          <div id="teacher-entry" class="room-wrap" style="display: block;">
+            <div class="room-emoji">👨‍🏫</div>
+            <div class="room-title">클래스 코드</div>
+            <div class="room-code-display" id="roomCodeDisplay">0000</div>
+            <div class="room-desc">학생들이 이 코드를 입력하도록 하세요</div>
+            <button class="btn btn-primary" id="btnTeacherStart">🎮 게임 시작</button>
+            <button class="btn btn-ghost" id="btnTeacherBack">뒤로</button>
+          </div>
+
+          <!-- Teacher Manage: 게임 진행 중 -->
+          <div id="teacher-manage" class="room-wrap" style="display: none;">
+            <div class="room-emoji">⏳</div>
+            <div class="room-title">게임 진행 중</div>
+            <div class="room-desc">학생들이 게임을 진행하고 있습니다</div>
+            <div style="color: var(--yellow); font-size: 18px; margin: 20px 0;">
+              <div>🎮 교실 코드: <span id="managingRoomCode">0000</span></div>
+            </div>
+            <button class="btn btn-ghost" id="btnTeacherExit">종료</button>
+          </div>
+        </div>
+
+        <!-- 📝 STUDENT 모드: 코드 입력 -->
+        <div id="room-student" style="display: none;">
+          <!-- Student Entry: 코드 입력 -->
+          <div id="student-entry" class="room-wrap" style="display: block;">
+            <div class="room-emoji">👧</div>
+            <div class="room-title">클래스 코드</div>
+            <div class="room-desc">선생님이 알려준 코드를 입력하세요</div>
+            <input id="roomInput" type="tel" maxlength="4" inputmode="numeric" class="room-input" placeholder="0000" autocomplete="off">
+            <div class="room-error" id="roomError" style="display: none;">❌ 코드를 다시 확인해 주세요</div>
+            <button class="btn btn-primary" id="btnStudentEnter">입장하기</button>
+            <button class="btn btn-ghost" id="btnStudentBack">뒤로</button>
+          </div>
+
+          <!-- Student Wait: 게임 시작 대기 -->
+          <div id="student-wait" class="room-wrap" style="display: none;">
+            <div class="room-emoji">⏳</div>
+            <div class="room-title">준비 완료!</div>
+            <div class="room-desc">선생님의 신호를 기다리고 있습니다...</div>
+            <div style="color: var(--yellow); font-size: 36px; margin: 30px 0; animation: pulse 1.5s infinite;">
+              ⏳
+            </div>
+            <button class="btn btn-ghost" id="btnStudentCancel">취소</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 시작 화면 -->
+      <div class="screen" id="screen-start">
+        <div class="start-wrap">
+          <div class="chalk-illustration">🖍️</div>
+          <div class="start-title">제시어를 보고 그림을 그려보세요!</div>
+          <div class="start-desc">
+            AI가 여러분이 그린 그림을 보고<br/>
+            무엇을 그렸는지 맞혀볼게요.<br/>
+            한 게임은 단어 5개로 진행돼요.
+          </div>
+          <div class="round-select" id="roundSelect">
+            <button class="round-btn active" data-rounds="5">5문제</button>
+            <button class="round-btn" data-rounds="10">10문제</button>
+          </div>
+          <button class="btn btn-primary" id="btnStart">시작하기</button>
+        </div>
+      </div>
+
+      <!-- 플레이 화면 -->
+      <div class="screen" id="screen-play">
+        <div class="prompt-row">
+          <div class="word-badge">제시어: <b id="wordLabel">사과</b></div>
+          <div class="timer">
+            <svg viewBox="0 0 60 60" width="56" height="56">
+              <circle class="timer-bg" cx="30" cy="30" r="26"></circle>
+              <circle class="timer-fg" id="timerRing" cx="30" cy="30" r="26"></circle>
+            </svg>
+            <div class="timer-num" id="timerNum">20</div>
+          </div>
+        </div>
+
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="drawCanvas" width="400" height="280"></canvas>
+          <div class="canvas-hint" id="canvasHint">여기에 손가락이나 마우스로 그려보세요</div>
+
+          <div class="overlay" id="overlayLoading">
+            <div class="overlay-inner">
+              <div class="spinner"></div>
+              <div class="overlay-title">AI가 그림을 보고 있어요...</div>
+            </div>
+          </div>
+
+          <div class="overlay" id="overlayResult">
+            <div class="overlay-inner">
+              <div class="overlay-emoji" id="resultEmoji">🎉</div>
+              <div class="overlay-title" id="resultTitle">정답이에요!</div>
+              <div class="overlay-sub" id="resultSub">AI가 본 그림: <b id="resultGuess">사과</b></div>
+              <button class="btn btn-primary" id="btnNext">다음 문제 →</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="toolbar">
+          <div class="tool-group">
+            <button class="icon-btn" id="btnClear">🧹 지우기</button>
+            <button class="icon-btn" id="btnBrush">✏️ 얇게</button>
+          </div>
+          <button class="btn btn-primary" id="btnSubmit" disabled>제출하기</button>
+        </div>
+      </div>
+
+      <!-- 결과 요약 화면 -->
+      <div class="screen" id="screen-summary">
+        <div class="summary-wrap">
+          <div class="overlay-emoji">🏁</div>
+          <div class="start-title" style="margin-bottom:0;">게임 완료!</div>
+          <div class="summary-score"><span id="finalScore">0</span> / <span id="finalTotal">5</span></div>
+          <div class="summary-dots" id="summaryDots"></div>
+          <button class="btn btn-primary" id="btnReplay">다시 하기</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="footer-note">AI가 그림을 분석하는 동안 인터넷 연결이 필요해요</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- 게임 로직 ----------
+
+  var ALL_WORDS = [
+    "사과","나무","자동차","물고기","우산","집","꽃","별","해","구름",
+    "고양이","강아지","새","나비","모자","시계","책","케이크","기차",
+    "비행기","풍선","안경","눈사람","신발",
+    "바나나","딸기","포도","수박","당근","토끼","사자","코끼리","곰",
+    "거북이","개구리","사탕","우유","의자","가방","연필","가위","장화",
+    "양말","그네","자전거","보트","달","무지개","트럭","오리"
+  ];
+
+  var ROUNDS = 5;
+  var ROUND_SECONDS = 20;
+
+  var state = {
+    phase: 'start', // 'start' | 'playing' | 'drawing' | 'submitting' | 'result' | 'summary'
+    words: [],
+    roundIndex: 0,
+    score: 0,
+    results: [], // 'correct' | 'wrong' per round
+    timeLeft: ROUND_SECONDS,
+    timerId: null,
+    hasDrawn: false,
+    lineWidth: 4,
+    drawing: false,
+    lastX: 0,
+    lastY: 0,
+    aiLock: false, // AI 중복 호출 방지
+    retryUsed: false, // retry 1회 제한
+    lastCallTime: 0 // API 호출 쿨다운 3초
+  };
+
+  // 🔐 Room System 전역 상태
+  var role = null; // 'teacher' | 'student'
+  var roomCode = null;
+  var isAuthorized = false;
+
+  // ---------- elements ----------
+  var screens = {
+    role: document.getElementById('screen-role'),
+    room: document.getElementById('screen-room'),
+    start: document.getElementById('screen-start'),
+    play: document.getElementById('screen-play'),
+    summary: document.getElementById('screen-summary')
+  };
+  var dotsEl = document.getElementById('dots');
+  var wordLabelEl = document.getElementById('wordLabel');
+  var timerNumEl = document.getElementById('timerNum');
+  var timerRingEl = document.getElementById('timerRing');
+  var canvas = document.getElementById('drawCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasHint = document.getElementById('canvasHint');
+  var btnSubmit = document.getElementById('btnSubmit');
+  var btnClear = document.getElementById('btnClear');
+  var btnBrush = document.getElementById('btnBrush');
+  var overlayLoading = document.getElementById('overlayLoading');
+  var overlayResult = document.getElementById('overlayResult');
+  var resultEmoji = document.getElementById('resultEmoji');
+  var resultTitle = document.getElementById('resultTitle');
+  var resultSub = document.getElementById('resultSub');
+  var resultGuess = document.getElementById('resultGuess');
+  var btnNext = document.getElementById('btnNext');
+  var finalScoreEl = document.getElementById('finalScore');
+  var finalTotalEl = document.getElementById('finalTotal');
+  var summaryDotsEl = document.getElementById('summaryDots');
+  var roundButtons = document.querySelectorAll('.round-btn');
+
+  var RING_CIRC = 2 * Math.PI * 26;
+  timerRingEl.style.strokeDasharray = RING_CIRC + ' ' + RING_CIRC;
+
+  // ---------- helpers ----------
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function showScreen(name){
+    Object.keys(screens).forEach(function(key){
+      screens[key].classList.toggle('active', key === name);
+    });
+    // 나가기 버튼: play 화면에서만 표시
+    var homeBtn = document.querySelector('.home-btn-wrapper');
+    if (homeBtn){
+      homeBtn.style.display = (name === 'play') ? 'block' : 'none';
+    }
+  }
+
+  function clearCanvas(){
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--board-dark') || '#243f35';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    state.hasDrawn = false;
+    btnSubmit.disabled = true;
+    canvasHint.style.display = 'flex';
+  }
+
+  function renderDots(){
+    dotsEl.innerHTML = '';
+    for (var i = 0; i < ROUNDS; i++){
+      var d = document.createElement('div');
+      d.className = 'dot';
+      if (i < state.results.length){
+        d.classList.add(state.results[i] === 'correct' ? 'correct' : 'wrong');
+      } else if (i === state.roundIndex){
+        d.classList.add('current');
+      }
+      dotsEl.appendChild(d);
+    }
+  }
+
+  // ---------- drawing ----------
+  function getPos(e){
+    var rect = canvas.getBoundingClientRect();
+    var clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    var clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  }
+
+  function startDraw(e){
+    if (state.phase !== 'drawing') return; // 🔐 phase 체크
+    state.drawing = true;
+    var p = getPos(e);
+    state.lastX = p.x; state.lastY = p.y;
+    canvasHint.style.display = 'none';
+    if (!state.hasDrawn){
+      state.hasDrawn = true;
+      btnSubmit.disabled = false;
+    }
+    e.preventDefault();
+  }
+
+  function moveDraw(e){
+    if (!state.drawing || state.phase !== 'drawing') return; // 🔐 phase 체크 추가
+    var p = getPos(e);
+    ctx.strokeStyle = '#f5f1e6';
+    ctx.lineWidth = state.lineWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(state.lastX, state.lastY);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    state.lastX = p.x; state.lastY = p.y;
+    e.preventDefault();
+  }
+
+  function endDraw(e){
+    state.drawing = false;
+  }
+
+  canvas.addEventListener('pointerdown', startDraw);
+  canvas.addEventListener('pointermove', moveDraw);
+  window.addEventListener('pointerup', endDraw);
+  canvas.addEventListener('pointerleave', function(e){ if (state.drawing){ /* keep drawing until pointerup for touch consistency */ } });
+
+  btnClear.addEventListener('click', function(){
+    clearCanvas();
+  });
+
+  btnBrush.addEventListener('click', function(){
+    if (state.lineWidth === 4){
+      state.lineWidth = 11;
+      btnBrush.textContent = '✏️ 굵게';
+      btnBrush.classList.add('active');
+    } else {
+      state.lineWidth = 4;
+      btnBrush.textContent = '✏️ 얇게';
+      btnBrush.classList.remove('active');
+    }
+  });
+
+  // ---------- timer ----------
+  function startTimer(){
+    state.timeLeft = ROUND_SECONDS;
+    updateTimerDisplay();
+    clearInterval(state.timerId);
+    state.timerId = setInterval(function(){
+      state.timeLeft -= 1;
+      updateTimerDisplay();
+      if (state.timeLeft <= 0){
+        clearInterval(state.timerId);
+        submitOnce('timer'); // 🔐 타이머 종료 시도 submitOnce 호출
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay(){
+    timerNumEl.textContent = state.timeLeft;
+    var ratio = Math.max(state.timeLeft, 0) / ROUND_SECONDS;
+    var offset = RING_CIRC * (1 - ratio);
+    timerRingEl.style.strokeDasharray = RING_CIRC + ' ' + RING_CIRC;
+    timerRingEl.style.strokeDashoffset = offset;
+    timerRingEl.style.stroke = state.timeLeft <= 5 ? 'var(--coral)' : 'var(--sky)';
+  }
+
+  // ---------- round flow ----------
+  function startRound(){
+    state.phase = 'drawing'; // 🔐 상태 시작
+    state.aiLock = false; // AI lock 리셋
+    state.retryUsed = false; // retry 리셋
+    renderDots();
+    wordLabelEl.textContent = state.words[state.roundIndex];
+    clearCanvas();
+    hideOverlays();
+    startTimer();
+  }
+
+  function hideOverlays(){
+    overlayLoading.classList.remove('active');
+    overlayResult.classList.remove('active');
+  }
+
+  // 🔐 캔버스가 사실상 비어있는지 확인 (배경색과 거의 같은 픽셀 비율로 판단)
+  // → 거의 안 그린 상태면 Gemini 호출 자체를 생략해서 비용/요청 수를 아낀다.
+  function isCanvasNearlyEmpty(){
+    var w = canvas.width, h = canvas.height;
+    var data = ctx.getImageData(0, 0, w, h).data;
+    var bgR = 0x24, bgG = 0x3f, bgB = 0x35; // --board-dark
+    var diffThreshold = 40;   // 배경색과의 색상 차이 임계값
+    var sampleStep = 4;       // 4픽셀당 1개만 검사 (성능)
+    var drawnCount = 0, sampledCount = 0;
+
+    for (var i = 0; i < data.length; i += 4 * sampleStep){
+      var diff = Math.abs(data[i] - bgR) + Math.abs(data[i+1] - bgG) + Math.abs(data[i+2] - bgB);
+      if (diff > diffThreshold) drawnCount++;
+      sampledCount++;
+    }
+    var drawnRatio = drawnCount / sampledCount;
+    return drawnRatio < 0.003; // 0.3% 미만이면 '거의 빈 캔버스'로 간주
+  }
+
+  // 🔐 전송용 이미지 압축: AI 인식에 필요한 최소 해상도로 축소해 전송량을 줄인다.
+  function getCompressedImage(){
+    var scale = 0.5; // 400x280 → 200x140 (약 1/4 픽셀 수)
+    var tmp = document.createElement('canvas');
+    tmp.width = Math.round(canvas.width * scale);
+    tmp.height = Math.round(canvas.height * scale);
+    tmp.getContext('2d').drawImage(canvas, 0, 0, tmp.width, tmp.height);
+    return tmp.toDataURL('image/jpeg', 0.5);
+  }
+
+  // 🔐 submitOnce: AI 호출 단일 진입점 (중복 호출 방지)
+  function submitOnce(trigger){
+    // 1. 상태 체크: drawing 상태일 때만 진행
+    if (state.phase !== 'drawing') return;
+
+    // 2. AI Lock: 이미 AI 호출 중이면 return
+    if (state.aiLock) return;
+
+    // 3. 쿨다운 체크: 3초 이내 재호출 방지
+    var now = Date.now();
+    if (now - state.lastCallTime < 3000) return;
+    state.lastCallTime = now;
+
+    state.aiLock = true;
+
+    // 4. 상태 전환
+    state.phase = 'submitting';
+    clearInterval(state.timerId);
+    btnSubmit.disabled = true;
+
+    if (!state.hasDrawn){
+      // 아무것도 그리지 않은 채 시간 종료 → AI 호출 없이 바로 처리
+      recordResult(false, 'timeout');
+      return;
+    }
+
+    if (isCanvasNearlyEmpty()){
+      // 거의 빈 캔버스 → AI 호출 없이 바로 안내
+      recordResult(false, 'empty');
+      return;
+    }
+
+    overlayLoading.classList.add('active');
+    var target = state.words[state.roundIndex];
+    var dataUrl = getCompressedImage();
+
+    askGemini(dataUrl, target)
+      .then(function(isCorrect){
+        overlayLoading.classList.remove('active');
+        recordResult(isCorrect, null);
+      })
+      .catch(function(err){
+        overlayLoading.classList.remove('active');
+        if (err && err.message === 'RATE_LIMIT_EXCEEDED'){
+          // 재시도 후에도 429가 계속되면 사용자에게 안내
+          recordResult(false, 'busy');
+        } else {
+          // 그 외 오류는 조용히 오답으로 처리
+          recordResult(false, null);
+        }
+      });
+  }
+
+  // 모든 submit 경로를 submitOnce()로 통합
+  document.getElementById('btnSubmit').addEventListener('click', function(){ submitOnce('button'); });
+
+  // reason: null(정상 판정) | 'timeout' | 'empty' | 'busy'
+  function recordResult(correct, reason){
+    state.results.push(correct ? 'correct' : 'wrong');
+    if (correct) state.score += 1;
+    renderDots();
+
+    state.phase = 'result'; // 🔐 상태 전환
+    state.retryUsed = false; // retry 카운트 리셋
+
+    var target = state.words[state.roundIndex];
+    resultEmoji.textContent = correct ? '🎉' : (reason === 'busy' ? '📶' : '🤔');
+    resultTitle.textContent = correct
+      ? '정답이에요!'
+      : (reason === 'busy' ? 'AI 서버가 혼잡해요' : '다음엔 맞힐 수 있을 거예요!');
+
+    if (reason === 'timeout'){
+      resultSub.innerHTML = '시간이 끝났어요! 정답은 <b>' + target + '</b> 였어요.';
+    } else if (reason === 'empty'){
+      resultSub.innerHTML = '그림이 너무 적어요! 정답은 <b>' + target + '</b> 였어요.';
+    } else if (reason === 'busy'){
+      resultSub.innerHTML = '잠시 후 다시 시도해 주세요.<br/>정답은 <b>' + target + '</b> 였어요.';
+    } else {
+      resultSub.innerHTML = '정답은 <b>' + target + '</b> 이었어요.';
+    }
+
+    overlayResult.classList.add('active');
+  }
+
+  btnNext.addEventListener('click', function(){
+    overlayResult.classList.remove('active');
+    state.roundIndex += 1;
+    if (state.roundIndex >= ROUNDS){
+      showSummary();
+    } else {
+      startRound();
+    }
+  });
+
+  function showSummary(){
+    state.phase = 'summary'; // 🔐 상태 업데이트
+    finalScoreEl.textContent = state.score;
+    finalTotalEl.textContent = ROUNDS;
+    summaryDotsEl.innerHTML = '';
+    state.results.forEach(function(r){
+      var d = document.createElement('div');
+      d.className = 'dot ' + (r === 'correct' ? 'correct' : 'wrong');
+      summaryDotsEl.appendChild(d);
+    });
+    showScreen('summary');
+  }
+
+  // ---------- Google Gemini API ----------
+  // Google AI Studio에서 발급받은 무료 API 키 (신용카드 불필요)
+  var GEMINI_API_KEY = 'AQ.Ab8RN6KGo78aqyhT2Hi1JRwiURT7vPZH8hqNznxiYW_e8pbHow';
+  
+  // 그림이 정답 단어와 일치하는지 여부(true/false)만 반환한다.
+  function askGemini(dataUrl, word){
+    return fetchWithRetry(dataUrl, word, 0).then(function(data){
+      var candidates = data.candidates || [];
+      if (candidates.length === 0) return false;
+      var content = candidates[0].content || {};
+      var parts = content.parts || [];
+      var textPart = parts.find(function(p){ return p.text; });
+      var answer = textPart ? textPart.text.trim().toUpperCase() : '';
+      return answer.indexOf('YES') === 0 || answer.indexOf('TRUE') === 0;
+    });
+  }
+
+  // 🔐 429(Too Many Requests) 대응: 최대 2회까지만 재시도, 재시도 전 고정 대기
+  var GEMINI_MAX_RETRY = 2;      // 최대 재시도 횟수
+  var GEMINI_RETRY_DELAY_MS = 1500; // 재시도 전 대기 시간
+
+  function wait(ms){
+    return new Promise(function(resolve){ setTimeout(resolve, ms); });
+  }
+
+  // 최소 프롬프트: "정답과 일치하는가?"만 YES/NO로 판정하도록 요청
+  function callGeminiOnce(dataUrl, word){
+    var base64 = dataUrl.split(',')[1];
+    var requestBody = {
+      contents: [{
+        parts: [
+          { text: '그림이 "' + word + '"이면 YES, 아니면 NO만 답하세요.' },
+          {
+            inlineData: {
+              mimeType: 'image/jpeg',
+              data: base64
+            }
+          }
+        ]
+      }]
+    };
+
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=' + GEMINI_API_KEY;
+
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+  }
+
+  // 429 발생 시 고정 대기 후 최대 2회 재시도. 그래도 실패하면 RATE_LIMIT_EXCEEDED 에러를 던진다.
+  function fetchWithRetry(dataUrl, word, attempt){
+    attempt = attempt || 0;
+    return callGeminiOnce(dataUrl, word).then(function(res){
+      if (res.status === 429){
+        if (attempt < GEMINI_MAX_RETRY){
+          return wait(GEMINI_RETRY_DELAY_MS).then(function(){
+            return fetchWithRetry(dataUrl, word, attempt + 1);
+          });
+        }
+        throw new Error('RATE_LIMIT_EXCEEDED');
+      }
+      if (!res.ok) throw new Error('API_ERROR_' + res.status);
+      return res.json();
+    });
+  }
+
+  // 🔐 ============ ROOM SYSTEM ============
+
+  // Helper: 4자리 랜덤 코드 생성
+  function generateRoomCode(){
+    return String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  }
+
+  // Helper: showScreen 확장 (모든 screen 닫고 하나만 열기)
+  var originalShowScreen = showScreen;
+  function showScreen(name){
+    Object.keys(screens).forEach(function(key){
+      screens[key].classList.toggle('active', key === name);
+    });
+    var homeBtn = document.querySelector('.home-btn-wrapper');
+    if (homeBtn) homeBtn.style.display = (name === 'play') ? 'block' : 'none';
+  }
+
+  // 🔐 게임 중 "나가기"를 누르면 역할 화면이 아니라 문제 수 선택 화면으로 이동
+  function exitToRoundSelect(){
+    clearInterval(state.timerId);
+    hideOverlays();
+    state.phase = 'start';
+    showScreen('start');
+  }
+
+  document.getElementById('btnExitGame').addEventListener('click', function(){
+    exitToRoundSelect();
+  });
+
+  // 1️⃣ 역할 선택
+  document.getElementById('btnTeacher').addEventListener('click', function(){
+    role = 'teacher';
+    roomCode = generateRoomCode();
+    localStorage.setItem('roomCode', roomCode);
+    document.getElementById('roomCodeDisplay').textContent = roomCode;
+    document.getElementById('room-teacher').style.display = 'block';
+    document.getElementById('room-student').style.display = 'none';
+    showScreen('room');
+  });
+
+  document.getElementById('btnStudent').addEventListener('click', function(){
+    role = 'student';
+    document.getElementById('room-teacher').style.display = 'none';
+    document.getElementById('room-student').style.display = 'block';
+    document.getElementById('roomInput').value = '';
+    document.getElementById('roomError').style.display = 'none';
+    showScreen('room');
+  });
+
+  // 2️⃣ Teacher: 게임 시작 (플래그만 설정, 게임 진입 X)
+  document.getElementById('btnTeacherStart').addEventListener('click', function(){
+    // localStorage에 게임 시작 플래그 설정
+    localStorage.setItem('gameStarted', 'true');
+    // Teacher 관리 화면으로 이동
+    showTeacherManageScreen();
+  });
+
+  // 3️⃣ Student: 코드 입력 & 검증
+  // Student 게임 시작 감시 인터벌
+  var studentWatchInterval = null;
+
+  document.getElementById('btnStudentEnter').addEventListener('click', function(){
+    var inputCode = document.getElementById('roomInput').value;
+    var storedCode = localStorage.getItem('roomCode');
+
+    if (inputCode.length !== 4){
+      document.getElementById('roomError').style.display = 'block';
+      return;
+    }
+
+    if (inputCode === storedCode){
+      isAuthorized = true;
+      document.getElementById('roomError').style.display = 'none';
+      // Student 대기 화면으로 전환
+      document.getElementById('student-entry').style.display = 'none';
+      document.getElementById('student-wait').style.display = 'block';
+      
+      // gameStarted 플래그를 감시하는 인터벌 시작
+      studentWatchInterval = setInterval(function(){
+        if (localStorage.getItem('gameStarted') === 'true'){
+          clearInterval(studentWatchInterval);
+          isAuthorized = true;
+          // 🔐 바로 게임 시작 대신 문제 수(5/10) 선택 화면으로 이동
+          showScreen('start');
+        }
+      }, 500); // 0.5초마다 확인
+    } else {
+      document.getElementById('roomError').style.display = 'block';
+      document.getElementById('roomInput').value = '';
+    }
+  });
+
+  // Student 대기 취소
+  document.getElementById('btnStudentCancel').addEventListener('click', function(){
+    if (studentWatchInterval) clearInterval(studentWatchInterval);
+    document.getElementById('student-entry').style.display = 'block';
+    document.getElementById('student-wait').style.display = 'none';
+    document.getElementById('roomInput').value = '';
+    isAuthorized = false;
+  });
+
+  // 4️⃣ 뒤로 가기 버튼
+  document.getElementById('btnTeacherBack').addEventListener('click', function(){
+    role = null;
+    roomCode = null;
+    localStorage.removeItem('roomCode');
+    showScreen('role');
+  });
+
+  document.getElementById('btnStudentBack').addEventListener('click', function(){
+    role = null;
+    showScreen('role');
+  });
+
+  // Teacher 관리 화면 표시
+  function showTeacherManageScreen(){
+    document.getElementById('teacher-entry').style.display = 'none';
+    document.getElementById('teacher-manage').style.display = 'block';
+    document.getElementById('managingRoomCode').textContent = roomCode;
+  }
+
+  // Teacher 게임 종료
+  document.getElementById('btnTeacherExit').addEventListener('click', function(){
+    localStorage.removeItem('gameStarted');
+    role = null;
+    roomCode = null;
+    isAuthorized = false;
+    document.getElementById('teacher-entry').style.display = 'block';
+    document.getElementById('teacher-manage').style.display = 'none';
+    showScreen('role');
+  });
+
+  // 5️⃣ 게임 시작 (room check + newGame)
+  function startGame(){
+    if (role === 'teacher'){
+      // Teacher는 게임 진입 안 함 (이미 관리 화면에서 처리됨)
+      return;
+    }
+    
+    if (role === 'student'){
+      // Student는 게임이 시작되었는지 확인 필요
+      if (localStorage.getItem('gameStarted') === 'true'){
+        isAuthorized = true;
+        newGame();
+      } else {
+        // 게임이 아직 시작되지 않았으면 대기
+        alert('선생님이 게임을 시작할 때까지 기다려주세요');
+        return;
+      }
+    }
+  }
+
+  // ---------- start / restart ----------
+  function newGame(){
+    state.phase = 'playing'; // 🔐 게임 시작 상태
+    state.words = shuffle(ALL_WORDS).slice(0, ROUNDS);
+    state.roundIndex = 0;
+    state.score = 0;
+    state.results = [];
+    showScreen('play');
+    startRound();
+  }
+
+  roundButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      roundButtons.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      ROUNDS = parseInt(btn.getAttribute('data-rounds'), 10);
+    });
+  });
+
+  document.getElementById('btnStart').addEventListener('click', startGame);
+  document.getElementById('btnReplay').addEventListener('click', function(){
+    exitToRoundSelect();
+  });
+
+  // initial paint
+  clearCanvas();
+  renderDots();
+  // 초기 상태: 나가기 버튼 숨김 (게임 화면에서만 표시)
+  document.querySelector('.home-btn-wrapper').style.display = 'none';
+})();
+</script>
+</body>
+</html>
