@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && (data.child('hostUid').val() === auth.uid || (!data.exists() && newData.child('hostUid').val() === auth.uid))",
+        "players": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/' + $code + '/state/phase').val() === 'lobby'",
+            ".validate": "newData.hasChild('name') && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 12"
+          }
+        },
+        "steps": {
+          "$c": {
+            "$r": {
+              ".write": "auth != null && !data.exists() && root.child('rooms/' + $code + '/slots/' + $c + '/' + $r).val() === auth.uid",
+              ".validate": "newData.child('uid').val() === auth.uid && newData.child('img').isString() && newData.child('img').val().beginsWith('data:image/') && newData.child('img').val().length < 400000"
+            }
+          }
+        },
+        "done": {
+          "$r": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid",
+              ".validate": "newData.isBoolean()"
+            }
+          }
+        }
+      }
+    }
+  }
+}
